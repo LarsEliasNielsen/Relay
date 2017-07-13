@@ -3,7 +3,7 @@ package dk.lndesign.relay.irc;
 /**
  * List of IRC return codes.
  * {@see http://www.networksorcery.com/enp/protocol/irc.htm}
- * @author Lars Nielsen <larn@tv2.dk>
+ * @author Lars Nielsen <lars@lndesign.dk>
  */
 public class IRCReturnCode {
 

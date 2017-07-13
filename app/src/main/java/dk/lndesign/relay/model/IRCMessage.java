@@ -7,7 +7,7 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 /**
- * @author Lars Nielsen <larn@tv2.dk>
+ * @author Lars Nielsen <lars@lndesign.dk>
  */
 public class IRCMessage {
 
