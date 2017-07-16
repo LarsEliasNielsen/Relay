@@ -4,11 +4,16 @@ import android.app.Notification;
 import android.app.PendingIntent;
 import android.app.Service;
 import android.content.Intent;
+import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.os.IBinder;
 import android.support.annotation.Nullable;
 import android.support.v4.app.NotificationCompat;
 import android.util.Log;
+
+import com.bumptech.glide.Glide;
+import com.bumptech.glide.request.animation.GlideAnimation;
+import com.bumptech.glide.request.target.SimpleTarget;
 
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
@@ -22,6 +27,7 @@ import dk.lndesign.relay.MainActivity;
 import dk.lndesign.relay.R;
 import dk.lndesign.relay.irc.IRCReturnCode;
 import dk.lndesign.relay.model.IRCMessage;
+import dk.lndesign.relay.model.Stream;
 
 /**
  * Foreground service for fetching Twitch IRC chat for Twitch channel.
@@ -30,18 +36,21 @@ import dk.lndesign.relay.model.IRCMessage;
 public class ChannelChatForegroundService extends Service {
 
     private static final String LOG_TAG = ChannelChatForegroundService.class.getSimpleName();
+    private volatile boolean running = true;
 
     @Override
     public void onCreate() {
         super.onCreate();
 
-        Thread thread = new Thread(new Runnable() {
+        Thread ircThread = new Thread(new Runnable() {
+            BufferedWriter writer;
+
             @Override
             public void run() {
                 try {
                     // Connect.
                     Socket socket = new Socket(Constants.Twitch.Irc.SERVER, Constants.Twitch.Irc.PORT);
-                    BufferedWriter writer = new BufferedWriter(new OutputStreamWriter(socket.getOutputStream()));
+                    writer = new BufferedWriter(new OutputStreamWriter(socket.getOutputStream()));
                     BufferedReader reader = new BufferedReader(new InputStreamReader(socket.getInputStream()));
 
                     // Login.
@@ -67,6 +76,13 @@ public class ChannelChatForegroundService extends Service {
 
                     // Read lines.
                     while ((line = reader.readLine()) != null) {
+                        if (!running) {
+                            // Departure from channel and stop thread.
+                            Log.d(LOG_TAG, "Departing channel: " + Constants.Twitch.CHANNEL);
+                            writer.write("PART " + Constants.Twitch.CHANNEL);
+                            return;
+                        }
+
                         IRCMessage ircMessage = new IRCMessage(line);
 
                         if (ircMessage.getCommand() != null &&
@@ -79,7 +95,7 @@ public class ChannelChatForegroundService extends Service {
                         // Respond to ping to avoid being disconnected.
                         if (ircMessage.getCommand() != null &&
                                 ircMessage.getCommand().equalsIgnoreCase("PING")) {
-                            Log.d("IRC", "PONG " + ircMessage.getMessage());
+                            Log.d("IRC", "PONG :" + ircMessage.getMessage());
 
                             writer.write("PONG " + ircMessage.getRaw().substring(5) + "\r\n");
                             writer.flush();
@@ -91,13 +107,15 @@ public class ChannelChatForegroundService extends Service {
                 }
             }
         });
-        thread.start();
+        ircThread.start();
     }
 
     @Override
     public int onStartCommand(Intent intent, int flags, int startId) {
         if (intent.getAction().equals(Constants.Action.START_FOREGROUND_ACTION)) {
             Log.d(LOG_TAG, "Starting foreground service");
+
+            Stream selectedStream = intent.getParcelableExtra(Constants.Key.SELECTED_STREAM);
 
             // Setup service notification.
             // TODO: Open chat with selected channel, instead of of opening main activity.
@@ -106,7 +124,7 @@ public class ChannelChatForegroundService extends Service {
             notificationIntent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
             PendingIntent pendingIntent = PendingIntent.getActivity(this, 0, notificationIntent, 0);
             // Build notification.
-            Notification notification = new NotificationCompat.Builder(this)
+            final NotificationCompat.Builder notificationBuilder = new NotificationCompat.Builder(this)
                     .setContentTitle("Relay Persistent Chat")
                     .setTicker("Relay Persistent Chat")
                     .setContentText(Constants.Twitch.CHANNEL)
@@ -114,18 +132,32 @@ public class ChannelChatForegroundService extends Service {
                     .setSmallIcon(R.mipmap.ic_launcher)
                     // TODO: Use channel icon.
                     .setLargeIcon(BitmapFactory.decodeResource(getResources(), R.mipmap.ic_launcher_round))
-                    .setOngoing(true)
-                    .build();
+                    .setOngoing(true);
+
+            // Replace large notification icon if we have a channel logo.
+            if (selectedStream != null && selectedStream.getChannel().getLogo() != null) {
+                Glide.with(getApplicationContext())
+                        .load(selectedStream.getChannel().getLogo())
+                        .asBitmap()
+                        .into(new SimpleTarget<Bitmap>() {
+                            @Override
+                            public void onResourceReady(Bitmap resource, GlideAnimation<? super Bitmap> glideAnimation) {
+                                notificationBuilder.setLargeIcon(resource);
+                            }
+                        });
+            }
 
             // Start foreground service with notification.
-            startForeground(Constants.Notification.FOREGROUND_SERVICE_ID, notification);
+            running = true;
+            startForeground(Constants.Notification.FOREGROUND_SERVICE_ID, notificationBuilder.build());
 
         } else if (intent.getAction().equals(Constants.Action.STOP_FOREGROUND_ACTION)) {
-                Log.d(LOG_TAG, "Stopping foreground service");
+            Log.d(LOG_TAG, "Stopping foreground service");
 
-                // Stop notification and service.
-                stopForeground(true);
-                stopSelf();
+            // Stop notification and service.
+            running = false;
+            stopForeground(true);
+            stopSelf();
         }
 
         return START_STICKY;

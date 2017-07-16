@@ -19,6 +19,7 @@ public class MainActivity extends AppCompatActivity {
     private static final String LOG_TAG = MainActivity.class.getSimpleName();
 
     private TwitchController mTwitchController = new TwitchController();
+    private Stream mSelectedStream;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -33,6 +34,7 @@ public class MainActivity extends AppCompatActivity {
             public void onClick(View view) {
                 Intent startIntent = new Intent(MainActivity.this, ChannelChatForegroundService.class);
                 startIntent.setAction(Constants.Action.START_FOREGROUND_ACTION);
+                startIntent.putExtra(Constants.Key.SELECTED_STREAM, mSelectedStream);
                 startService(startIntent);
             }
         });
@@ -45,11 +47,16 @@ public class MainActivity extends AppCompatActivity {
             }
         });
 
-        mTwitchController.loadLiveFollowedChannels(new LoadingCallback<FollowedChannels>() {
+        // TODO: Only fetch live channels.
+        mTwitchController.loadFollowedChannels(new LoadingCallback<FollowedChannels>() {
             @Override
             public void onDataLoaded(@NonNull FollowedChannels response, boolean isFromCache) {
                 for (Stream stream : response.getStreams()) {
                     Log.d(LOG_TAG, stream.toString());
+
+                    if (Constants.Twitch.CHANNEL.equals("#" + stream.getChannel().getName())) {
+                        mSelectedStream = stream;
+                    }
                 }
             }
 
