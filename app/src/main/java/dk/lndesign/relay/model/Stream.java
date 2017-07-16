@@ -11,19 +11,20 @@ import java.util.Locale;
  * @author Lars Nielsen <lars@lndesign.dk>
  */
 public class Stream implements Parcelable {
-
     @SerializedName("_id")
     private String id;
     private String game;
     private Integer viewers;
+    private Preview preview;
     private Channel channel;
     @SerializedName("stream_type")
     private String streamType;
 
-    private Stream(Parcel in) {
+    public Stream(Parcel in) {
         id = in.readString();
         game = in.readString();
         viewers = in.readInt();
+        preview = in.readParcelable(Preview.class.getClassLoader());
         channel = in.readParcelable(Channel.class.getClassLoader());
         streamType = in.readString();
     }
@@ -38,6 +39,10 @@ public class Stream implements Parcelable {
 
     public Integer getViewers() {
         return viewers;
+    }
+
+    public Preview getPreview() {
+        return preview;
     }
 
     public Channel getChannel() {
@@ -58,6 +63,7 @@ public class Stream implements Parcelable {
         dest.writeString(getId());
         dest.writeString(getGame());
         dest.writeInt(getViewers());
+        dest.writeParcelable(getPreview(), flags);
         dest.writeParcelable(getChannel(), flags);
         dest.writeString(getStreamType());
     }
@@ -78,8 +84,59 @@ public class Stream implements Parcelable {
                 getId(), getGame(), getViewers(), getChannel());
     }
 
-    public static class Channel implements Parcelable {
+    public static class Preview implements Parcelable {
+        private String small;
+        private String medium;
+        private String large;
 
+        public Preview(Parcel in) {
+            small = in.readString();
+            medium = in.readString();
+            large = in.readString();
+        }
+
+        public String getSmall() {
+            return small;
+        }
+
+        public String getMedium() {
+            return medium;
+        }
+
+        public String getLarge() {
+            return large;
+        }
+
+        @Override
+        public int describeContents() {
+            return 0;
+        }
+
+        @Override
+        public void writeToParcel(Parcel dest, int flags) {
+            dest.writeString(getSmall());
+            dest.writeString(getMedium());
+            dest.writeString(getLarge());
+        }
+
+        public static final Creator<Preview> CREATOR = new Creator<Preview>() {
+            public Preview createFromParcel(Parcel in) {
+                return new Preview(in);
+            }
+
+            public Preview[] newArray(int size) {
+                return new Preview[size];
+            }
+        };
+
+        public String toString() {
+            return String.format(Locale.getDefault(),
+                    "Preview { small: %s, medium: %s, large: %s }",
+                    getSmall(), getMedium(), getLarge());
+        }
+    }
+
+    public static class Channel implements Parcelable {
         @SerializedName("_id")
         private String id;
         @SerializedName("display_name")
