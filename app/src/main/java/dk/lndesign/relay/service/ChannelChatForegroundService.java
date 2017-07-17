@@ -78,6 +78,8 @@ public class ChannelChatForegroundService extends Service {
                     while ((line = reader.readLine()) != null) {
                         if (!running) {
                             // Departure from channel and stop thread.
+                            // Departure will one happen on new output lines from IRC channel.
+                            // TODO: Trigger departure ASAP, not only on new lines.
                             Log.d(LOG_TAG, "Departing channel: " + Constants.Twitch.CHANNEL);
                             writer.write("PART " + Constants.Twitch.CHANNEL);
                             return;
@@ -123,6 +125,11 @@ public class ChannelChatForegroundService extends Service {
             notificationIntent.setAction(Constants.Action.FOREGROUND_MAIN_ACTION);
             notificationIntent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
             PendingIntent pendingIntent = PendingIntent.getActivity(this, 0, notificationIntent, 0);
+
+            Intent disconnectChatIntent = new Intent(this, ChannelChatForegroundService.class);
+            disconnectChatIntent.setAction(Constants.Action.STOP_FOREGROUND_ACTION);
+            PendingIntent pendingDisconnectChatIntent = PendingIntent.getService(this, 0, disconnectChatIntent, 0);
+
             // Build notification.
             final NotificationCompat.Builder notificationBuilder = new NotificationCompat.Builder(this)
                     .setContentTitle("Relay Persistent Chat")
@@ -132,6 +139,9 @@ public class ChannelChatForegroundService extends Service {
                     .setSmallIcon(R.mipmap.ic_launcher)
                     // TODO: Use channel icon.
                     .setLargeIcon(BitmapFactory.decodeResource(getResources(), R.mipmap.ic_launcher_round))
+                    .addAction(R.drawable.ic_close_black_24dp,
+                            "Disconnect",
+                            pendingDisconnectChatIntent)
                     .setOngoing(true);
 
             // Replace large notification icon if we have a channel logo.

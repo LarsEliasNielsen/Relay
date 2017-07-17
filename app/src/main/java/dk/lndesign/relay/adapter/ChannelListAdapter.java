@@ -19,7 +19,7 @@ import dk.lndesign.relay.R;
 import dk.lndesign.relay.model.Stream;
 
 /**
- * @author Lars Nielsen <larn@tv2.dk>
+ * @author Lars Nielsen <lars@lndesign.dk>
  */
 public class ChannelListAdapter extends RecyclerView.Adapter<ChannelListAdapter.ViewHolder> {
 
@@ -99,6 +99,11 @@ public class ChannelListAdapter extends RecyclerView.Adapter<ChannelListAdapter.
         return mItems.size();
     }
 
+    /**
+     * Format viewer count by shorting large numbers.
+     * @param viewers Total viewer count
+     * @return Formatted viewer count.
+     */
     private String getFormattedViewerCount(int viewers) {
         if (viewers > 1000) {
             return String.format(Locale.getDefault(),
