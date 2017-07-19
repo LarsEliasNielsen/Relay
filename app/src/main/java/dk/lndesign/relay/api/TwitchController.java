@@ -10,6 +10,7 @@ import java.util.List;
 import dk.lndesign.relay.RelayApp;
 import dk.lndesign.relay.listener.LoadingCallback;
 import dk.lndesign.relay.model.FollowedChannels;
+import dk.lndesign.relay.model.Stream;
 import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
@@ -28,13 +29,19 @@ public class TwitchController {
         mTwitchApiService = RelayApp.getInstance().getTwitchApiService();
     }
 
-    public void loadFollowedChannels(@NonNull LoadingCallback<FollowedChannels> callback) {
+    public void loadStream(@NonNull String channel, @NonNull LoadingCallback<Stream.Wrapper> callback) {
+        Call<Stream.Wrapper> call = mTwitchApiService.getStream(channel);
+
+        makeRequest("Stream [" + channel + "]", call, callback);
+    }
+
+    public void loadFollowedStreams(@NonNull LoadingCallback<FollowedChannels> callback) {
         Call<FollowedChannels> call = mTwitchApiService.getFollowedChannels("all", 100);
 
         makeRequest("Followed Twitch streams [all]", call, callback);
     }
 
-    public void loadLiveFollowedChannels(@NonNull LoadingCallback<FollowedChannels> callback) {
+    public void loadLiveFollowedStreams(@NonNull LoadingCallback<FollowedChannels> callback) {
         Call<FollowedChannels> call = mTwitchApiService.getFollowedChannels("live", 100);
 
         makeRequest("Followed Twitch streams [live]", call, callback);

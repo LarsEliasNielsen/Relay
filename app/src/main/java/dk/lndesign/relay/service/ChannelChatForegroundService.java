@@ -1,6 +1,5 @@
 package dk.lndesign.relay.service;
 
-import android.app.Notification;
 import android.app.PendingIntent;
 import android.app.Service;
 import android.content.Intent;
@@ -38,6 +37,8 @@ public class ChannelChatForegroundService extends Service {
     private static final String LOG_TAG = ChannelChatForegroundService.class.getSimpleName();
     private volatile boolean running = true;
 
+    private Stream mSelectedStream;
+
     @Override
     public void onCreate() {
         super.onCreate();
@@ -71,7 +72,7 @@ public class ChannelChatForegroundService extends Service {
                     }
 
                     // Join.
-                    writer.write("JOIN " + Constants.Twitch.CHANNEL + "\r\n");
+                    writer.write("JOIN #" + mSelectedStream.getChannel().getName() + "\r\n");
                     writer.flush();
 
                     // Read lines.
@@ -80,8 +81,8 @@ public class ChannelChatForegroundService extends Service {
                             // Departure from channel and stop thread.
                             // Departure will one happen on new output lines from IRC channel.
                             // TODO: Trigger departure ASAP, not only on new lines.
-                            Log.d(LOG_TAG, "Departing channel: " + Constants.Twitch.CHANNEL);
-                            writer.write("PART " + Constants.Twitch.CHANNEL);
+                            Log.d(LOG_TAG, "Departing channel: " + mSelectedStream.getChannel().getName());
+                            writer.write("PART " + mSelectedStream.getChannel().getName());
                             return;
                         }
 
@@ -117,7 +118,7 @@ public class ChannelChatForegroundService extends Service {
         if (intent.getAction().equals(Constants.Action.START_FOREGROUND_ACTION)) {
             Log.d(LOG_TAG, "Starting foreground service");
 
-            Stream selectedStream = intent.getParcelableExtra(Constants.Key.SELECTED_STREAM);
+            mSelectedStream = intent.getParcelableExtra(Constants.Key.SELECTED_STREAM);
 
             // Setup service notification.
             // TODO: Open chat with selected channel, instead of of opening main activity.
@@ -145,9 +146,13 @@ public class ChannelChatForegroundService extends Service {
                     .setOngoing(true);
 
             // Replace large notification icon if we have a channel logo.
-            if (selectedStream != null && selectedStream.getChannel().getLogo() != null) {
+            if (mSelectedStream != null && mSelectedStream.getChannel().getLogo() != null) {
+                // Add channel name.
+                notificationBuilder.setContentText(mSelectedStream.getChannel().getDisplayName());
+
+                // Add channel logo.
                 Glide.with(getApplicationContext())
-                        .load(selectedStream.getChannel().getLogo())
+                        .load(mSelectedStream.getChannel().getLogo())
                         .asBitmap()
                         .into(new SimpleTarget<Bitmap>() {
                             @Override

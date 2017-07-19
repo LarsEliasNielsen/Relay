@@ -58,7 +58,7 @@ public class MainActivity extends AppCompatActivity {
         });
 
         // TODO: Only fetch live channels.
-        mTwitchController.loadFollowedChannels(new LoadingCallback<FollowedChannels>() {
+        mTwitchController.loadFollowedStreams(new LoadingCallback<FollowedChannels>() {
             @Override
             public void onDataLoaded(@NonNull FollowedChannels response, boolean isFromCache) {
                 mFollowedChannels = response.getStreams();

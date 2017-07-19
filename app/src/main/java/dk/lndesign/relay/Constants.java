@@ -7,6 +7,7 @@ public class Constants {
 
     public interface Key {
         String SELECTED_STREAM = "dk.lndesign.relay.key.selected_stream";
+        String SELECTED_CHANNEL_NAME = "dk.lndesign.relay.key.selected_channel_name";
     }
 
     public interface Action {

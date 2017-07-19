@@ -205,4 +205,36 @@ public class Stream implements Parcelable {
         }
     }
 
+    public static class Wrapper implements Parcelable {
+        public Stream stream;
+
+        public Wrapper(Parcel in) {
+            stream = in.readParcelable(Wrapper.class.getClassLoader());
+        }
+
+        public Stream getStream() {
+            return stream;
+        }
+
+        @Override
+        public int describeContents() {
+            return 0;
+        }
+
+        @Override
+        public void writeToParcel(Parcel dest, int flags) {
+            dest.writeParcelable(getStream(), flags);
+        }
+
+        public static final Creator<Wrapper> CREATOR = new Creator<Wrapper>() {
+            public Wrapper createFromParcel(Parcel in) {
+                return new Wrapper(in);
+            }
+
+            public Wrapper[] newArray(int size) {
+                return new Wrapper[size];
+            }
+        };
+    }
+
 }

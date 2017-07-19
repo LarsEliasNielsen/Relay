@@ -2,9 +2,11 @@ package dk.lndesign.relay.api;
 
 import dk.lndesign.relay.Constants;
 import dk.lndesign.relay.model.FollowedChannels;
+import dk.lndesign.relay.model.Stream;
 import retrofit2.Call;
 import retrofit2.http.GET;
 import retrofit2.http.Headers;
+import retrofit2.http.Path;
 import retrofit2.http.Query;
 
 /**
@@ -28,6 +30,15 @@ public interface TwitchApiService {
     String AUTHORIZATION = "Authorization";
     String RESPONSE_CACHE_HEADER = "response-cache"; // This header will be inserted into responses to override server.
     String CACHE_CONTROL = "Cache-Control";
+
+    @Headers({
+            ACCEPT + ": application/vnd.twitchtv.v3+json",
+            AUTHORIZATION + ": OAuth " + Constants.Twitch.ACCESS_TOKEN,
+            RESPONSE_CACHE_HEADER + ": max-age=" + MINUTE,
+            CACHE_CONTROL + ": max-stale=" + HOUR
+    })
+    @GET("streams/{channel}")
+    Call<Stream.Wrapper> getStream(@Path("channel") String channel);
 
     /**
      * Fetch a list of followed streams.

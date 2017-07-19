@@ -1,6 +1,7 @@
 package dk.lndesign.relay.adapter;
 
 import android.content.Context;
+import android.content.Intent;
 import android.support.annotation.NonNull;
 import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
@@ -15,8 +16,12 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
 
+import dk.lndesign.relay.ChatActivity;
+import dk.lndesign.relay.Constants;
+import dk.lndesign.relay.MainActivity;
 import dk.lndesign.relay.R;
 import dk.lndesign.relay.model.Stream;
+import dk.lndesign.relay.service.ChannelChatForegroundService;
 
 /**
  * @author Lars Nielsen <lars@lndesign.dk>
@@ -54,15 +59,23 @@ public class ChannelListAdapter extends RecyclerView.Adapter<ChannelListAdapter.
         LayoutInflater inflater = LayoutInflater.from(parent.getContext());
 
         View view = inflater.inflate(R.layout.recycler_item_channel, parent, false);
-        ViewHolder vh = new ViewHolder(view);
-
-        return vh;
+        return new ViewHolder(view);
     }
 
     @Override
-    public void onBindViewHolder(ViewHolder holder, int position) {
-        Context context = holder.itemView.getContext();
+    public void onBindViewHolder(final ViewHolder holder, int position) {
+        final Context context = holder.itemView.getContext();
         Stream stream = mItems.get(position);
+
+        holder.itemView.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                Intent chatIntent = ChatActivity.newIntent(
+                        context,
+                        mItems.get(holder.getAdapterPosition()).getChannel().getName());
+                context.startActivity(chatIntent);
+            }
+        });
 
         Glide.with(context)
                 .load(stream.getPreview().getMedium())

@@ -23,6 +23,10 @@
             </intent-filter>
         </activity>
 
+        <activity android:name=".ChatActivity"
+            android:parentActivityName=".MainActivity">
+        </activity>
+
         <service android:name=".service.ChannelChatForegroundService" />
     </application>
 
