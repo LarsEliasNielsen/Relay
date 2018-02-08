@@ -8,7 +8,6 @@ import android.graphics.BitmapFactory;
 import android.os.IBinder;
 import android.support.annotation.Nullable;
 import android.support.v4.app.NotificationCompat;
-import android.util.Log;
 
 import com.bumptech.glide.Glide;
 import com.bumptech.glide.request.animation.GlideAnimation;
@@ -27,6 +26,7 @@ import dk.lndesign.relay.R;
 import dk.lndesign.relay.irc.IRCReturnCode;
 import dk.lndesign.relay.model.IRCMessage;
 import dk.lndesign.relay.model.Stream;
+import timber.log.Timber;
 
 /**
  * Foreground service for fetching Twitch IRC chat for Twitch channel.
@@ -34,7 +34,6 @@ import dk.lndesign.relay.model.Stream;
  */
 public class ChannelChatForegroundService extends Service {
 
-    private static final String LOG_TAG = ChannelChatForegroundService.class.getSimpleName();
     private volatile boolean running = true;
 
     private Stream mSelectedStream;
@@ -63,10 +62,10 @@ public class ChannelChatForegroundService extends Service {
                     while ((line = reader.readLine()) != null) {
                         if (line.contains(IRCReturnCode.RPL_MYINFO)) {
                             // We are now logged in.
-                            Log.d(LOG_TAG, "Logged in");
+                            Timber.d("Logged in");
                             break;
                         } else if (line.contains(IRCReturnCode.ERR_NICKNAMEINUSE)) {
-                            Log.e(LOG_TAG, "Nickname is already in use.");
+                            Timber.e("Nickname is already in use.");
                             return;
                         }
                     }
@@ -81,7 +80,7 @@ public class ChannelChatForegroundService extends Service {
                             // Departure from channel and stop thread.
                             // Departure will one happen on new output lines from IRC channel.
                             // TODO: Trigger departure ASAP, not only on new lines.
-                            Log.d(LOG_TAG, "Departing channel: " + mSelectedStream.getChannel().getName());
+                            Timber.d("Departing channel: %s", mSelectedStream.getChannel().getName());
                             writer.write("PART " + mSelectedStream.getChannel().getName());
                             return;
                         }
@@ -90,15 +89,15 @@ public class ChannelChatForegroundService extends Service {
 
                         if (ircMessage.getCommand() != null &&
                                 ircMessage.getCommand().equalsIgnoreCase("PRIVMSG")) {
-                            Log.i("IRC", ircMessage.toString());
+                            Timber.i(ircMessage.toString());
                         } else {
-                            Log.w("IRC", ircMessage.getRaw());
+                            Timber.w(ircMessage.getRaw());
                         }
 
                         // Respond to ping to avoid being disconnected.
                         if (ircMessage.getCommand() != null &&
                                 ircMessage.getCommand().equalsIgnoreCase("PING")) {
-                            Log.d("IRC", "PONG :" + ircMessage.getMessage());
+                            Timber.d("PONG :%s", ircMessage.getMessage());
 
                             writer.write("PONG " + ircMessage.getRaw().substring(5) + "\r\n");
                             writer.flush();
@@ -106,7 +105,7 @@ public class ChannelChatForegroundService extends Service {
                     }
 
                 } catch (IOException e) {
-                    Log.e(LOG_TAG, "Could not establish connection to server: " + Constants.Twitch.Irc.SERVER);
+                    Timber.e("Could not establish connection to server: %s", Constants.Twitch.Irc.SERVER);
                 }
             }
         });
@@ -115,8 +114,9 @@ public class ChannelChatForegroundService extends Service {
 
     @Override
     public int onStartCommand(Intent intent, int flags, int startId) {
-        if (intent.getAction().equals(Constants.Action.START_FOREGROUND_ACTION)) {
-            Log.d(LOG_TAG, "Starting foreground service");
+        if (intent.getAction() != null &&
+                intent.getAction().equals(Constants.Action.START_FOREGROUND_ACTION)) {
+            Timber.d("Starting foreground service");
 
             mSelectedStream = intent.getParcelableExtra(Constants.Key.SELECTED_STREAM);
 
@@ -167,7 +167,7 @@ public class ChannelChatForegroundService extends Service {
             startForeground(Constants.Notification.FOREGROUND_SERVICE_ID, notificationBuilder.build());
 
         } else if (intent.getAction().equals(Constants.Action.STOP_FOREGROUND_ACTION)) {
-            Log.d(LOG_TAG, "Stopping foreground service");
+            Timber.d("Stopping foreground service");
 
             // Stop notification and service.
             running = false;

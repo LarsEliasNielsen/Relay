@@ -4,6 +4,7 @@ import android.app.Application;
 
 import dk.lndesign.relay.api.TwitchApiService;
 import dk.lndesign.relay.api.TwitchApiServiceBuilder;
+import timber.log.Timber;
 
 /**
  * @author Lars Nielsen <lars@lndesign.dk>
@@ -26,6 +27,10 @@ public class RelayApp extends Application {
         super.onCreate();
 
         sInstance = this;
+
+        if (BuildConfig.DEBUG) {
+            Timber.plant(new Timber.DebugTree());
+        }
 
         mTwitchApiService = TwitchApiServiceBuilder.createRetrofit(this, API_TWITCH_BASE_URL, API_TWITCH_CACHE_DIR).create(TwitchApiService.class);
     }

@@ -17,11 +17,8 @@ import java.util.List;
 import java.util.Locale;
 
 import dk.lndesign.relay.ChatActivity;
-import dk.lndesign.relay.Constants;
-import dk.lndesign.relay.MainActivity;
 import dk.lndesign.relay.R;
 import dk.lndesign.relay.model.Stream;
-import dk.lndesign.relay.service.ChannelChatForegroundService;
 
 /**
  * @author Lars Nielsen <lars@lndesign.dk>

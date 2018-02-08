@@ -2,7 +2,6 @@ package dk.lndesign.relay.api;
 
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
-import android.util.Log;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -14,13 +13,12 @@ import dk.lndesign.relay.model.Stream;
 import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
+import timber.log.Timber;
 
 /**
  * @author Lars Nielsen <lars@lndesign.dk>
  */
 public class TwitchController {
-
-    private static final String LOG_TAG = TwitchController.class.getSimpleName();
 
     private TwitchApiService mTwitchApiService;
     private List<Call<?>> mCallList = new ArrayList<>();
@@ -104,16 +102,16 @@ public class TwitchController {
                              @NonNull LoadingCallback callback) {
 
         if (call.isCanceled()) {
-            Log.e(LOG_TAG, identification + " request was canceled");
+            Timber.e("%s request was canceled", identification);
         } else {
             if (response != null) {
-                Log.e(LOG_TAG, identification + " request failed with: " + response.message());
+                Timber.e("%s request failed with: %s", identification, response.message());
 
             } else {
-                Log.e(LOG_TAG, identification + " request failed");
+                Timber.e("%s request failed", identification);
             }
 
-            Log.e(LOG_TAG, "Url: " + call.request().url(), throwable);
+            Timber.e(throwable, "Url: %s", call.request().url());
 
             // Only invoke callback if the call wasn't canceled
             callback.onLoadingFailed();

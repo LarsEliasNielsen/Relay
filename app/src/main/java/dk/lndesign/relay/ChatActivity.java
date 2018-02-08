@@ -2,19 +2,17 @@ package dk.lndesign.relay;
 
 import android.content.Context;
 import android.content.Intent;
+import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.v7.app.AppCompatActivity;
-import android.os.Bundle;
-import android.util.Log;
 
 import dk.lndesign.relay.api.TwitchController;
 import dk.lndesign.relay.listener.LoadingCallback;
 import dk.lndesign.relay.model.Stream;
 import dk.lndesign.relay.service.ChannelChatForegroundService;
+import timber.log.Timber;
 
 public class ChatActivity extends AppCompatActivity {
-
-    private static final String LOG_TAG = ChatActivity.class.getSimpleName();
 
     private TwitchController mTwitchController = new TwitchController();
 
@@ -47,11 +45,11 @@ public class ChatActivity extends AppCompatActivity {
 
                 @Override
                 public void onLoadingFailed() {
-                    Log.e(LOG_TAG, "Failed to load stream");
+                    Timber.e("Failed to load stream");
                 }
             });
         } else {
-            Log.e(LOG_TAG, "No channel provided, please use #netIntent(Context, String)");
+            Timber.e("No channel provided, please use #netIntent(Context, String)");
         }
     }
 }
