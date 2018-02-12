@@ -132,14 +132,18 @@ public class ChannelChatForegroundService extends Service {
             PendingIntent pendingDisconnectChatIntent = PendingIntent.getService(this, 0, disconnectChatIntent, 0);
 
             // Build notification.
-            final NotificationCompat.Builder notificationBuilder = new NotificationCompat.Builder(this)
+            final NotificationCompat.Builder notificationBuilder =
+                    new NotificationCompat.Builder(
+                            this, this.getString(R.string.test_notification_channel_id))
                     .setContentTitle("Relay Persistent Chat")
                     .setTicker("Relay Persistent Chat")
                     .setContentText(Constants.Twitch.CHANNEL)
                     .setContentIntent(pendingIntent)
                     .setSmallIcon(R.mipmap.ic_launcher)
                     // TODO: Use channel icon.
-                    .setLargeIcon(BitmapFactory.decodeResource(getResources(), R.mipmap.ic_launcher_round))
+                    .setLargeIcon(
+                            BitmapFactory.decodeResource(getResources(),
+                                    R.mipmap.ic_launcher_round))
                     .addAction(R.drawable.ic_close_black_24dp,
                             "Disconnect",
                             pendingDisconnectChatIntent)

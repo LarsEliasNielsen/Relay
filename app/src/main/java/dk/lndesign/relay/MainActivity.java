@@ -1,6 +1,9 @@
 package dk.lndesign.relay;
 
+import android.app.NotificationChannel;
+import android.app.NotificationManager;
 import android.content.Intent;
+import android.os.Build;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.v7.app.AppCompatActivity;
@@ -36,6 +39,18 @@ public class MainActivity extends AppCompatActivity {
 
         Button startForegroundServiceButton = findViewById(R.id.foreground_service_start);
         Button stopForegroundServiceButton = findViewById(R.id.foreground_service_stop);
+
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+            // Create channel to show notifications.
+            String channelId  = getString(R.string.test_notification_channel_id);
+            String channelName = getString(R.string.test_notification_channel_name);
+            NotificationManager notificationManager =
+                    getSystemService(NotificationManager.class);
+            if (notificationManager != null) {
+                notificationManager.createNotificationChannel(new NotificationChannel(channelId,
+                        channelName, NotificationManager.IMPORTANCE_LOW));
+            }
+        }
 
         startForegroundServiceButton.setOnClickListener(new View.OnClickListener() {
             @Override
