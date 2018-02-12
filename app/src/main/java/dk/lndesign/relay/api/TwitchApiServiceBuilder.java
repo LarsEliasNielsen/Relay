@@ -16,10 +16,11 @@ import okhttp3.Response;
 import retrofit2.Retrofit;
 import retrofit2.converter.gson.GsonConverterFactory;
 
+/***************************************************************************************************
+ * CONSTRUCTION ZONE: CONVERTING TO KOTLIN                                                         *
+ **************************************************************************************************/
 /**
  * Util class used for setting up Retrofit.
- *
- * @author Lars Nielsen <lars@lndesign.dk>
  */
 public class TwitchApiServiceBuilder {
 

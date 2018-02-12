@@ -20,9 +20,9 @@ import dk.lndesign.relay.ChatActivity;
 import dk.lndesign.relay.R;
 import dk.lndesign.relay.model.Stream;
 
-/**
- * @author Lars Nielsen <lars@lndesign.dk>
- */
+/***************************************************************************************************
+ * CONSTRUCTION ZONE: CONVERTING TO KOTLIN                                                         *
+ **************************************************************************************************/
 public class ChannelListAdapter extends RecyclerView.Adapter<ChannelListAdapter.ViewHolder> {
 
     private List<Stream> mItems = new ArrayList<>();

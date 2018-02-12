@@ -15,9 +15,9 @@ import retrofit2.Callback;
 import retrofit2.Response;
 import timber.log.Timber;
 
-/**
- * @author Lars Nielsen <lars@lndesign.dk>
- */
+/***************************************************************************************************
+ * CONSTRUCTION ZONE: CONVERTING TO KOTLIN                                                         *
+ **************************************************************************************************/
 public class TwitchController {
 
     private TwitchApiService mTwitchApiService;
